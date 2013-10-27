@@ -7,7 +7,7 @@ void setup() {
   textSize(20);
 
   checkbox = new Checkbox[4];
-  button = new Button(200, 200, "Bytt farge");
+  button = new Button(200, 200, "Change color");
 
   for (int i = 0; i < checkbox.length; i++) {
     checkbox[i] = new Checkbox(100, 100 + (i * 25));
@@ -62,7 +62,7 @@ class Checkbox {
 
 class Button {
   int x, y, bWidth = 10, bHeight, padding = 10;
-  String text = "Button test";
+  String text = "Button";
   int textSize = 20;
   boolean pressed = false;
 
