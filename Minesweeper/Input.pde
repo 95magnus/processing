@@ -1,6 +1,0 @@
-class Input{
-  
-  public Input(){
-  }
-  
-}
