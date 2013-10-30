@@ -1,4 +1,5 @@
 int gridWidth, gridHeight, heightGUI = 50;
+int bombCount, timer = 120;
 byte difficulty = 0;
 
 static final int TILE_SIZE = 32;
@@ -26,7 +27,8 @@ void setup() {
 
 void draw() {
   background(192);
-
+  if (millis() % 1000 <= 5) timer--;
+  
   screen.render();
 }
 
