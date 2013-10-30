@@ -1,4 +1,4 @@
-int gridWidth, gridHeight;
+int gridWidth, gridHeight, heightGUI = 50;
 byte difficulty = 0;
 
 static final int TILE_SIZE = 32;
@@ -11,16 +11,17 @@ void setup() {
   smooth();
   noStroke();
   frame.setResizable(true);
+  //frame.setSize(width, height);
   frame.setTitle("Minesweeper");
 
   for (int y = 0; y < 4; y++) {
     for (int x = 0; x < 4; x++) {
-      tiles[x + y * 4] = new Tile(100 + (x * TILE_SIZE), 100 + (y * TILE_SIZE), true);
+      tiles[x + y * 4] = new Tile(100 + (int)(x * TILE_SIZE*1), 100 + (int)(y * TILE_SIZE*1), true);
     }
   }
 
   gridWidth = width / TILE_SIZE;
-  gridHeight = height - 100;
+  gridHeight = height - heightGUI;
 }
 
 void draw() {
