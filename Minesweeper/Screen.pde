@@ -16,7 +16,6 @@ class Screen{
     rectMode(CENTER);
     fill(64,128);
     rect(width/2, heightGUI/2, 100, heightGUI - heightGUI/4);
-    
   }
   
   private void renderTiles(){
