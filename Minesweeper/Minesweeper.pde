@@ -1,5 +1,5 @@
 int gridWidth, gridHeight, heightGUI = 50;
-int bombCount, timer = 120;
+int bombCount, timer = 120, time = 0;
 byte difficulty = 0;
 
 static final int TILE_SIZE = 32;
@@ -18,7 +18,7 @@ void setup() {
   for (int y = 0; y < 4; y++) {
     for (int x = 0; x < 4; x++) {
       tiles[x + y * 4] = new Tile(100 + (int)(x * TILE_SIZE*1), 100 + (int)(y * TILE_SIZE*1), true);
-    }
+      if (tiles[x + y * 4].isBomb) bombCount++;    }
   }
 
   gridWidth = width / TILE_SIZE;
@@ -27,8 +27,8 @@ void setup() {
 
 void draw() {
   background(192);
-  if (millis() % 1000 <= 5) timer--;
-  
+  if (time % 60 == 0) timer--;
+  time++;
   screen.render();
 }
 
