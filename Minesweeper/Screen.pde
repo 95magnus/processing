@@ -23,7 +23,7 @@ class Screen{
     fill(0,255,0);
     textAlign(CENTER, CENTER);
     textSize(25);
-    text((timer - (timer % 60)) / 60 + ":" + timer % 60, width/2, heightGUI/2);
+    text((timer - (timer % 60)) / 60 + ":" + df.format(timer % 60), width/2, heightGUI/2);
       
     //Left - bomb count
     rectMode(CENTER);

@@ -1,9 +1,12 @@
+import java.text.DecimalFormat;
+
 int gridWidth, gridHeight, heightGUI = 50;
-int bombCount, timer = 120, time = 0;
+int bombCount, timer = 132, time = 0;
 byte difficulty = 0;
 
-static final int TILE_SIZE = 32;
+final int TILE_SIZE = 32;
 
+DecimalFormat df = new DecimalFormat("00");
 Screen screen = new Screen();
 Tile[] tiles = new Tile[16];
 
@@ -18,7 +21,8 @@ void setup() {
   for (int y = 0; y < 4; y++) {
     for (int x = 0; x < 4; x++) {
       tiles[x + y * 4] = new Tile(100 + (int)(x * TILE_SIZE*1), 100 + (int)(y * TILE_SIZE*1), true);
-      if (tiles[x + y * 4].isBomb) bombCount++;    }
+      if (tiles[x + y * 4].isBomb) bombCount++;
+    }
   }
 
   gridWidth = width / TILE_SIZE;
@@ -29,6 +33,7 @@ void draw() {
   background(192);
   if (time % 60 == 0) timer--;
   time++;
+
   screen.render();
 }
 
@@ -40,4 +45,3 @@ void mouseClicked() {
     }
   }
 }
-
