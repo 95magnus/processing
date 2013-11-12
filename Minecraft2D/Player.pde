@@ -2,9 +2,13 @@ class Player {
   int xScreen, yScreen, xMap, yMap, eyeXPos, eyeYPos;
   int cooldownTime = 0, time = 0;
   float yVelocity, speed;
-  boolean onGround, jumping;
+  float swing = 0, swingSpeed = .1, angle = 0;
+  boolean onGround, jumping, moving, punched;
   HashMap<String, Line2D> pBounds = new HashMap<String, Line2D>();
 
+  float a = 0;
+        
+ 
   boolean flipped = false;
   int spriteWidth = playerSprites.get("torso").width;
   int spriteHeight = playerSprites.get("torso").height;
@@ -47,12 +51,62 @@ class Player {
       yOffset -= yVelocity;
     }
 
-    image(playerSprites.get("head"), xScreen - (headSize / 2), yScreen - (spriteHeight * 2) - headSize + (2 * SCALE));
-    image(playerSprites.get("leg2"), xScreen - (spriteWidth / 2), yScreen - spriteHeight);
-    image(playerSprites.get("leg1"), xScreen - (spriteWidth / 2), yScreen - spriteHeight);
-    image(playerSprites.get("torso"), xScreen - (spriteWidth / 2), yScreen - (spriteHeight * 2) + (2 * SCALE));
-    image(playerSprites.get("arm2"), xScreen - (spriteWidth / 2), yScreen - (spriteHeight * 2) + (2 * SCALE));
-    image(playerSprites.get("arm1"), xScreen - (spriteWidth / 2), yScreen - (spriteHeight * 2) + (2 * SCALE));
+    if (moving) {
+      
+      pushMatrix();
+      translate(xScreen, yScreen - spriteHeight);
+      rotate(swing);
+      image(playerSprites.get("leg2"), -(spriteWidth/2),0);
+      popMatrix();
+      
+      pushMatrix();
+      translate(xScreen, yScreen - spriteHeight);
+      rotate(-swing);
+      image(playerSprites.get("leg1"), -(spriteWidth/2),0);
+      popMatrix();
+
+      pushMatrix();
+      translate(xScreen, yScreen - (spriteHeight * 2) + (2 * SCALE));
+      rotate(-swing);
+      image(playerSprites.get("arm2"), -(spriteWidth/2), 0);
+      popMatrix();
+
+      image(playerSprites.get("head"), xScreen - (headSize / 2), yScreen - (spriteHeight * 2) - headSize + (2 * SCALE));
+      image(playerSprites.get("torso"), xScreen - (spriteWidth / 2), yScreen - (spriteHeight * 2) + (2 * SCALE));
+
+      pushMatrix();
+      translate(xScreen, yScreen - (spriteHeight * 2) + (2 * SCALE));
+      rotate(swing);
+      image(playerSprites.get("arm1"), -(spriteWidth/2), 0);
+      popMatrix();
+    }
+    else {
+      if (punched){
+        a = (a > PI/2) ? a+swingSpeed*2 : a - swingSpeed*2;
+        
+        pushMatrix();
+        translate(xScreen, yScreen - (spriteHeight * 2) + (2 * SCALE) + (spriteWidth/2));
+        if (mouseX < xScreen){
+          rotate(PI/2);
+        }else{
+          rotate(-PI/2);
+        }
+        
+        image(playerSprites.get("arm1"), -(spriteWidth/2), 0);
+        popMatrix();
+      }
+      
+      image(playerSprites.get("head"), xScreen - (headSize / 2), yScreen - (spriteHeight * 2) - headSize + (2 * SCALE));
+      image(playerSprites.get("leg2"), xScreen - (spriteWidth / 2), yScreen - spriteHeight);
+      image(playerSprites.get("leg1"), xScreen - (spriteWidth / 2), yScreen - spriteHeight);
+      image(playerSprites.get("arm2"), xScreen - (spriteWidth / 2), yScreen - (spriteHeight * 2) + (2 * SCALE));
+      image(playerSprites.get("torso"), xScreen - (spriteWidth / 2), yScreen - (spriteHeight * 2) + (2 * SCALE));
+      image(playerSprites.get("arm1"), xScreen - (spriteWidth / 2), yScreen - (spriteHeight * 2) + (2 * SCALE));
+    }
+
+
+    angle = (moving) ? angle + swingSpeed : 0;
+    if (moving)swing = sin(angle);
 
     if (debugGUI) {
       fill(0xffff00ff);
@@ -99,6 +153,8 @@ class Player {
     if (keys[3] && !collision("left")) {
       xMap -= playerSpeed;
     }
+    
+    moving = (keys[1] || keys[3]) ? true : false;
     /*    
      if (collision("up") && !onGround) {
      yVelocity = 0;

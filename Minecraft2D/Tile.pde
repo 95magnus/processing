@@ -38,7 +38,7 @@ class Tile {
   }
 
   public boolean isSolid() {
-    if (name.equals("air"))return false;
+    if (name.equals("air")) return false;
     return true;
   }
 }

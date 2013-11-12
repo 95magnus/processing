@@ -12,7 +12,7 @@ int viewDist;
 boolean hasCollided = false, debugGUI = false, inSight;
 boolean saving = false;
 
-boolean loadLevelFromFile = false, doneLoading = false;
+boolean loadLevelFromFile = true, doneLoading = false;
 
 final String TITLE = "Minecraft 2D", VERSION = "alpha 0.1";
 final int SCALE = 3, TILE_SIZE = 16 * SCALE;
@@ -27,6 +27,8 @@ HashMap<String, PImage> playerSprites = new HashMap<String, PImage>();
 Tile[] map;
 
 Player player;
+Input input = new Input();
+Screen screen = new Screen();
 
 void setup() {
   size(640, 480);
@@ -56,8 +58,8 @@ void draw() {
     renderMap();
     player.render();
     player.move();
-    mouseEvents();
-    if (debugGUI) renderDebugOverlay();
+    input.mouseEvents();
+    if (debugGUI) screen.renderDebugOverlay();
 
     if (player.collision("down") && !hasCollided) { 
       println("On ground"); 
@@ -70,17 +72,6 @@ void draw() {
   }
 }
 
-public void renderDebugOverlay() {
-  fill(255); 
-  textSize(15);
-  text(TITLE + " - " + VERSION + " | " + (int)frameRate + " fps", 5, 20);
-  text("playerPos - x: " + df.format((float)player.xMap/TILE_SIZE) + "  y:" + df.format((float)player.yMap/TILE_SIZE), 5, 40);
-  text("onGround = " + player.onGround, 5, 60);
-
-  stroke(255, 0, 0);
-  if (inSight) stroke(0, 128, 0);
-  line(player.eyeXPos, player.eyeYPos, mouseX, mouseY);
-}
 
 public void loadImages() {
   spriteSheet = loadImage("spriteSheet.png");
@@ -193,7 +184,7 @@ public int lineLength(Line2D line) {
 
   return (int) sqrt(x + y);
 }
-
+/*
 public boolean isNum(String str) {
   try {
     int n = Integer.parseInt(str);
@@ -203,6 +194,7 @@ public boolean isNum(String str) {
   }
   return true;
 }
+*/
 
 public void renderMap() { 
   for (Tile tiles : map) {
@@ -237,26 +229,12 @@ public void loadNewMap(int mapWidth, int mapHeigth) {
   }
 }
 
-public void mouseEvents() {
-  int xTile = (mouseX + xOffset) / TILE_SIZE;
-  int yTile = (mouseY + yOffset) / TILE_SIZE;
-  int index = xTile + yTile * mapWidth;
+public int xCoord(int tileIndex) {
+  return (tileIndex % mapWidth) * TILE_SIZE;
+}
 
-  Line2D lineOfSight = new Line2D.Float(player.eyeXPos + xOffset, player.eyeYPos + yOffset, mouseX + xOffset, mouseY + yOffset);
-  inSight = true;
-  for (Tile t : map) {
-    if (t.bounds == null) t.setBounds();
-    if (lineLength(lineOfSight) > viewDist || (t.tileIndex != map[index].tileIndex && t.isSolid() && lineOfSight.intersects(t.bounds))) inSight = false;
-  }
-  if (inSight && map[index].isSolid())map[index].renderBounds(index);
-
-  //if (debugGUI)line((float)lineOfSight.getX1() - xOffset, (float)lineOfSight.getY1() - yOffset, (float)lineOfSight.getX2() - xOffset, (float)lineOfSight.getY2() - yOffset);
-
-  if (mousePressed && inSight) {
-    if (mouseButton == LEFT && map[index].name != "air") map[index] = new Tile("air", index); 
-    if (mouseButton == RIGHT && map[index].name == "air") map[index] = new Tile("dirt", index);
-    map[index].setPos(index);
-  }
+public int yCoord(int tileIndex) {
+  return ((tileIndex - (tileIndex % mapWidth)) / mapWidth) * TILE_SIZE;
 }
 
 void keyPressed() {
@@ -267,6 +245,7 @@ void keyPressed() {
     if (keyCode == LEFT)keys[3] = true;
   }
 }
+
 void keyReleased() {
   if (key == CODED) {
     if (keyCode == UP)keys[0] = false;
@@ -276,13 +255,5 @@ void keyReleased() {
   }
   if (keyCode == BACKSPACE)saveLevel("level");
   if (keyCode == ENTER) debugGUI = !debugGUI;
-}
-
-int xCoord(int tileIndex) {
-  return (tileIndex % mapWidth) * TILE_SIZE;
-}
-
-int yCoord(int tileIndex) {
-  return ((tileIndex - (tileIndex % mapWidth)) / mapWidth) * TILE_SIZE;
 }
 
