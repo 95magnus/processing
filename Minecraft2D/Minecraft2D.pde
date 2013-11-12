@@ -12,7 +12,7 @@ int viewDist;
 boolean hasCollided = false, debugGUI = false, inSight;
 boolean saving = false;
 
-boolean loadLevelFromFile = true, doneLoading = false;
+boolean loadLevelFromFile = false, doneLoading = false;
 
 final String TITLE = "Minecraft 2D", VERSION = "alpha 0.1";
 final int SCALE = 3, TILE_SIZE = 16 * SCALE;
@@ -186,15 +186,15 @@ public int lineLength(Line2D line) {
 }
 /*
 public boolean isNum(String str) {
-  try {
-    int n = Integer.parseInt(str);
-  }
-  catch(NumberFormatException e) {
-    return false;
-  }
-  return true;
-}
-*/
+ try {
+ int n = Integer.parseInt(str);
+ }
+ catch(NumberFormatException e) {
+ return false;
+ }
+ return true;
+ }
+ */
 
 public void renderMap() { 
   for (Tile tiles : map) {
@@ -238,21 +238,18 @@ public int yCoord(int tileIndex) {
 }
 
 void keyPressed() {
-  if (key == CODED) {
-    if (keyCode == UP)keys[0] = true;
-    if (keyCode == RIGHT)keys[1] = true;
-    if (keyCode == DOWN)keys[2] = true;
-    if (keyCode == LEFT)keys[3] = true;
-  }
+  if (keyCode == UP || key == 'w')keys[0] = true;
+  if (keyCode == RIGHT || key == 'd')keys[1] = true;
+  if (keyCode == DOWN || key == 's')keys[2] = true;
+  if (keyCode == LEFT || key == 'a')keys[3] = true;
 }
 
 void keyReleased() {
-  if (key == CODED) {
-    if (keyCode == UP)keys[0] = false;
-    if (keyCode == RIGHT)keys[1] = false;
-    if (keyCode == DOWN)keys[2] = false;
-    if (keyCode == LEFT)keys[3] = false;
-  }
+  if (keyCode == UP || key == 'w')keys[0] = false;
+  if (keyCode == RIGHT || key == 'd')keys[1] = false;
+  if (keyCode == DOWN || key == 's')keys[2] = false;
+  if (keyCode == LEFT || key == 'a')keys[3] = false;
+
   if (keyCode == BACKSPACE)saveLevel("level");
   if (keyCode == ENTER) debugGUI = !debugGUI;
 }

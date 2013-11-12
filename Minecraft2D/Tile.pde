@@ -10,7 +10,7 @@ class Tile {
     this.tileIndex = tileIndex;
     this.x = xCoord(tileIndex);
     this.y = yCoord(tileIndex);
-   } 
+  } 
 
   public void render(int xScroll, int yScroll) {
     this.xScroll = xScroll;
@@ -42,3 +42,4 @@ class Tile {
     return true;
   }
 }
+

@@ -2,13 +2,10 @@ class Player {
   int xScreen, yScreen, xMap, yMap, eyeXPos, eyeYPos;
   int cooldownTime = 0, time = 0;
   float yVelocity, speed;
-  float swing = 0, swingSpeed = .1, angle = 0;
-  boolean onGround, jumping, moving, punched;
+  float swing = 0, swingSpeed = .1, angle = 0, armAngle = 0;
+  boolean onGround, jumping, moving, movingLeft, punching;
   HashMap<String, Line2D> pBounds = new HashMap<String, Line2D>();
 
-  float a = 0;
-        
- 
   boolean flipped = false;
   int spriteWidth = playerSprites.get("torso").width;
   int spriteHeight = playerSprites.get("torso").height;
@@ -21,15 +18,12 @@ class Player {
   }
 
   public void render() {
+    println(moving);
     fill(255, 0, 0);
     setBounds();
-    //println(xMap + "-" + yMap);
+
     eyeXPos = (xMap - xOffset) + (headSize/2);
     eyeYPos = (yMap - yOffset) - (playerHeight - (headSize/2));
-
-    //    eyeXPos = xMap + (headSize/2);
-    //  eyeYPos = yMap - (playerHeight - (headSize/2));
-
     xScreen = xMap - xOffset;
     yScreen = yMap - yOffset;
 
@@ -52,17 +46,13 @@ class Player {
     }
 
     if (moving) {
-      
+      angle += swingSpeed;
+      swing = sin(angle);
+
       pushMatrix();
       translate(xScreen, yScreen - spriteHeight);
       rotate(swing);
-      image(playerSprites.get("leg2"), -(spriteWidth/2),0);
-      popMatrix();
-      
-      pushMatrix();
-      translate(xScreen, yScreen - spriteHeight);
-      rotate(-swing);
-      image(playerSprites.get("leg1"), -(spriteWidth/2),0);
+      image(playerSprites.get("leg2"), -(spriteWidth/2), 0);
       popMatrix();
 
       pushMatrix();
@@ -71,8 +61,13 @@ class Player {
       image(playerSprites.get("arm2"), -(spriteWidth/2), 0);
       popMatrix();
 
-      image(playerSprites.get("head"), xScreen - (headSize / 2), yScreen - (spriteHeight * 2) - headSize + (2 * SCALE));
       image(playerSprites.get("torso"), xScreen - (spriteWidth / 2), yScreen - (spriteHeight * 2) + (2 * SCALE));
+
+      pushMatrix();
+      translate(xScreen, yScreen - spriteHeight);
+      rotate(-swing);
+      image(playerSprites.get("leg1"), -(spriteWidth/2), 0);
+      popMatrix();
 
       pushMatrix();
       translate(xScreen, yScreen - (spriteHeight * 2) + (2 * SCALE));
@@ -81,63 +76,50 @@ class Player {
       popMatrix();
     }
     else {
-      if (punched){
-        a = (a > PI/2) ? a+swingSpeed*2 : a - swingSpeed*2;
-        
-        pushMatrix();
-        translate(xScreen, yScreen - (spriteHeight * 2) + (2 * SCALE) + (spriteWidth/2));
-        if (mouseX < xScreen){
-          rotate(PI/2);
-        }else{
-          rotate(-PI/2);
-        }
-        
-        image(playerSprites.get("arm1"), -(spriteWidth/2), 0);
-        popMatrix();
-      }
-      
+      angle = 0;
       image(playerSprites.get("head"), xScreen - (headSize / 2), yScreen - (spriteHeight * 2) - headSize + (2 * SCALE));
       image(playerSprites.get("leg2"), xScreen - (spriteWidth / 2), yScreen - spriteHeight);
       image(playerSprites.get("leg1"), xScreen - (spriteWidth / 2), yScreen - spriteHeight);
       image(playerSprites.get("arm2"), xScreen - (spriteWidth / 2), yScreen - (spriteHeight * 2) + (2 * SCALE));
       image(playerSprites.get("torso"), xScreen - (spriteWidth / 2), yScreen - (spriteHeight * 2) + (2 * SCALE));
-      image(playerSprites.get("arm1"), xScreen - (spriteWidth / 2), yScreen - (spriteHeight * 2) + (2 * SCALE));
+      if (!punching)image(playerSprites.get("arm1"), xScreen - (spriteWidth / 2), yScreen - (spriteHeight * 2) + (2 * SCALE));
+      if (punching) {
+        armAngle += speed; 
+        pushMatrix();
+        translate(xScreen- (spriteWidth / 2), yScreen - (spriteHeight * 2) + (2 * SCALE) + (spriteWidth/2));
+
+        if (mouseX < xScreen) {
+          rotate(armAngle);
+        }
+        else {
+          rotate(-armAngle);
+        }
+
+        image(playerSprites.get("arm1"), -(spriteWidth/2), 0);
+        popMatrix();
+      }
     }
 
-
-    angle = (moving) ? angle + swingSpeed : 0;
-    if (moving)swing = sin(angle);
-
-    if (debugGUI) {
-      fill(0xffff00ff);
-      noStroke();
-      rect(eyeXPos - 3, eyeYPos - 3, eyeXPos + 3, eyeYPos + 3);
-
-      stroke(0xffff00ff);
-      ellipseMode(RADIUS);
-      noFill();
-      ellipse(eyeXPos, eyeYPos, viewDist, viewDist);
-      noStroke();
+    if (mouseX < xScreen) { 
+      pushMatrix();
+      translate(xScreen, yScreen - (spriteHeight * 2) - headSize + (2 * SCALE));
+      scale(-1, 1);
+      image(playerSprites.get("head"), -(headSize/2), 0);
+      popMatrix();
     }
+    else {
+      image(playerSprites.get("head"), xScreen - (headSize/2), yScreen - (spriteHeight * 2) - headSize + (2 * SCALE));
+    }
+  }
+
+  private void startPunchAnim() {
+    armAngle = 0;
   }
 
   public void move() {
     cooldownTime++;
     onGround = collision("down") ? true : false;
     yVelocity = onGround ? 0 : yVelocity < terminalVelocity ? yVelocity += gravity : terminalVelocity;
-
-    /*
-  if(IsGrounded()) {
-     //vSpeed = 0;
-     yVelocity = 0;
-     
-     if(Input.GetButtonDown("Jump"){
-     vSpeed = 5;
-     }
-     
-     yVelocity -= gravity * Time.deltaTime;
-     vSpeed += yVelocity * Time.deltaTime;
-     */
 
     if (keys[0] && onGround && cooldownTime > jumpCooldownTime) {
       yVelocity = TILE_SIZE * 1.5;
@@ -153,13 +135,8 @@ class Player {
     if (keys[3] && !collision("left")) {
       xMap -= playerSpeed;
     }
-    
     moving = (keys[1] || keys[3]) ? true : false;
-    /*    
-     if (collision("up") && !onGround) {
-     yVelocity = 0;
-     }
-     */
+    movingLeft = (keys[3]) ? true : false;
   }
 
   private void setBounds() {

@@ -23,10 +23,7 @@ class Input {
       if (mouseButton == LEFT && map[index].name != "air") map[index] = new Tile("air", index); 
       if (mouseButton == RIGHT && map[index].name == "air") map[index] = new Tile("dirt", index);
       map[index].setPos(index);
-      player.punched = true;
-    }else {
-      player.punched = false;
+      player.startPunchAnim();
     }
   }
 }
-

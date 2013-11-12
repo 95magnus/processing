@@ -12,6 +12,18 @@ class Screen {
     stroke(255, 0, 0);
     if (inSight) stroke(0, 128, 0);
     line(player.eyeXPos, player.eyeYPos, mouseX, mouseY);
+
+    if (debugGUI) {
+      fill(0xffff00ff);
+      noStroke();
+      rect(player.eyeXPos - 3, player.eyeYPos - 3, player.eyeXPos + 3, player.eyeYPos + 3);
+
+      stroke(0xffff00ff);
+      ellipseMode(RADIUS);
+      noFill();
+      ellipse(player.eyeXPos, player.eyeYPos, viewDist, viewDist);
+      noStroke();
+    }
   }
 }
 
