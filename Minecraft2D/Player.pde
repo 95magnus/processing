@@ -1,29 +1,31 @@
-class Player {
-  int xScreen, yScreen, xMap, yMap, eyeXPos, eyeYPos;
-  int cooldownTime = 0, time = 0;
-  float yVelocity, speed;
-  float swing = 0, swingSpeed = .1, angle = 0, armAngle = 0;
+class Player{
+  int xScreen, yScreen, xMap, yMap, cooldownTime = 0, time = 0;
+  int spriteWidth, spriteHeight, headSize, playerHeight;
+  float yVelocity, speed, swing = 0, swingSpeed = .1, angle = 0, armAngle = 0;
   boolean onGround, jumping, moving, movingLeft, punching;
-  HashMap<String, Line2D> pBounds = new HashMap<String, Line2D>();
-
-  boolean flipped = false;
-  int spriteWidth = playerSprites.get("torso").width;
-  int spriteHeight = playerSprites.get("torso").height;
-  int headSize = playerSprites.get("head").width;
-  int playerHeight = (spriteHeight * 2) + headSize - (2 * SCALE);
+  HashMap<String, Line2D> bounds = new HashMap<String, Line2D>(4);
+  PVector eyePos;
 
   public Player(int x, int y) {
     this.xMap = x;
     this.yMap = y;
+    
+    spriteWidth = playerSprites.get("torso").width;
+    spriteHeight = playerSprites.get("torso").height;
+    headSize = playerSprites.get("head").width;
+    playerHeight = (spriteHeight * 2) + headSize - (2 * SCALE);
+    eyePos = new PVector((xMap - xOffset) - (headSize/2), (yMap - yOffset) - (playerHeight - (headSize/2)));
+  
+    println(spriteHeight);
   }
 
   public void render() {
-    println(moving);
+    //println(PVector.angleBetween(eyePos, mouse));
     fill(255, 0, 0);
     setBounds();
-
-    eyeXPos = (xMap - xOffset) + (headSize/2);
-    eyeYPos = (yMap - yOffset) - (playerHeight - (headSize/2));
+   
+    eyePos = (mouseX < xScreen) ? new PVector((xMap - xOffset) - (headSize/2), (yMap - yOffset) - (playerHeight - (headSize/2))) : new PVector((xMap - xOffset) + (headSize/2), (yMap - yOffset) - (playerHeight - (headSize/2)));
+    
     xScreen = xMap - xOffset;
     yScreen = yMap - yOffset;
 
@@ -77,7 +79,6 @@ class Player {
     }
     else {
       angle = 0;
-      image(playerSprites.get("head"), xScreen - (headSize / 2), yScreen - (spriteHeight * 2) - headSize + (2 * SCALE));
       image(playerSprites.get("leg2"), xScreen - (spriteWidth / 2), yScreen - spriteHeight);
       image(playerSprites.get("leg1"), xScreen - (spriteWidth / 2), yScreen - spriteHeight);
       image(playerSprites.get("arm2"), xScreen - (spriteWidth / 2), yScreen - (spriteHeight * 2) + (2 * SCALE));
@@ -102,13 +103,18 @@ class Player {
 
     if (mouseX < xScreen) { 
       pushMatrix();
-      translate(xScreen, yScreen - (spriteHeight * 2) - headSize + (2 * SCALE));
+      translate(xScreen, yScreen - (spriteHeight * 2) - (headSize/2) + (2 * SCALE));
       scale(-1, 1);
-      image(playerSprites.get("head"), -(headSize/2), 0);
+      //rotate(-PVector.angleBetween(eyePos, mouse)+(PI/4));
+      image(playerSprites.get("head"), -(headSize/2), - (headSize/2));
       popMatrix();
     }
     else {
-      image(playerSprites.get("head"), xScreen - (headSize/2), yScreen - (spriteHeight * 2) - headSize + (2 * SCALE));
+      pushMatrix();
+      translate(xScreen, yScreen - (spriteHeight * 2) - (headSize/2) + (2 * SCALE));
+      //rotate(-PVector.angleBetween(eyePos, mouse)+(PI/4));
+      image(playerSprites.get("head"), -(headSize/2), - (headSize/2));
+      popMatrix();
     }
   }
 
@@ -117,9 +123,11 @@ class Player {
   }
 
   public void move() {
+
     cooldownTime++;
     onGround = collision("down") ? true : false;
-    yVelocity = onGround ? 0 : yVelocity < terminalVelocity ? yVelocity += gravity : terminalVelocity;
+
+    yVelocity = onGround ? 0 : yVelocity < terminalVelocity ? yVelocity += gravity: terminalVelocity;
 
     if (keys[0] && onGround && cooldownTime > jumpCooldownTime) {
       yVelocity = TILE_SIZE * 1.5;
@@ -140,17 +148,17 @@ class Player {
   }
 
   private void setBounds() {
-    pBounds.clear();
-    pBounds.put("down", new Line2D.Float(xMap - (headSize / 2) + 2, yMap, xMap + (headSize / 2) - 2, yMap));     
-    pBounds.put("up", new Line2D.Float(xMap - (headSize / 2) + 2, yMap - playerHeight, xMap + (headSize / 2) - 2, yMap - playerHeight));     
-    pBounds.put("left", new Line2D.Float(xMap - (headSize / 2), yMap - 5, xMap - (headSize / 2), yMap - playerHeight + 5));     
-    pBounds.put("right", new Line2D.Float(xMap + (headSize / 2), yMap - 5, xMap + (headSize / 2), yMap - playerHeight + 5));
+    bounds.clear();
+    bounds.put("down", new Line2D.Float(xMap - (headSize / 2) + 2, yMap, xMap + (headSize / 2) - 2, yMap));     
+    bounds.put("up", new Line2D.Float(xMap - (headSize / 2) + 2, yMap - playerHeight, xMap + (headSize / 2) - 2, yMap - playerHeight));     
+    bounds.put("left", new Line2D.Float(xMap - (headSize / 2), yMap - 5, xMap - (headSize / 2), yMap - playerHeight + 5));     
+    bounds.put("right", new Line2D.Float(xMap + (headSize / 2), yMap - 5, xMap + (headSize / 2), yMap - playerHeight + 5));
   }
 
   private boolean collision(String name) {
     for (Tile t : map) {
       if (t.bounds == null)t.setBounds();
-      if (t.isSolid() && pBounds.get(name).intersects(t.bounds)) return true;
+      if (t.isSolid() && bounds.get(name).intersects(t.bounds)) return true;
     }
     return false;
   }

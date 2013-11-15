@@ -7,21 +7,22 @@ class Screen {
     textSize(15);
     text(TITLE + " - " + VERSION + " | " + (int)frameRate + " fps", 5, 20);
     text("playerPos - x: " + df.format((float)player.xMap/TILE_SIZE) + "  y:" + df.format((float)player.yMap/TILE_SIZE), 5, 40);
-    text("onGround = " + player.onGround, 5, 60);
+    text("onGround: " + player.onGround, 5, 60);
+    text("moving: " + player.moving, 5, 80);
 
     stroke(255, 0, 0);
-    if (inSight) stroke(0, 128, 0);
-    line(player.eyeXPos, player.eyeYPos, mouseX, mouseY);
+    if (input.inSight) stroke(0, 128, 0);
+    line(player.eyePos.x, player.eyePos.y, mouseX, mouseY);
 
     if (debugGUI) {
       fill(0xffff00ff);
       noStroke();
-      rect(player.eyeXPos - 3, player.eyeYPos - 3, player.eyeXPos + 3, player.eyeYPos + 3);
+      rect(player.eyePos.x - 3, player.eyePos.y - 3, player.eyePos.x + 3, player.eyePos.y + 3);
 
       stroke(0xffff00ff);
       ellipseMode(RADIUS);
       noFill();
-      ellipse(player.eyeXPos, player.eyeYPos, viewDist, viewDist);
+      ellipse(player.eyePos.x, player.eyePos.y, viewDist, viewDist);
       noStroke();
     }
   }

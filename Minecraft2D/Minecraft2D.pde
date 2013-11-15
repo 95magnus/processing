@@ -3,16 +3,12 @@ import java.awt.geom.Line2D;
 import java.text.DecimalFormat;
 import java.io.FileNotFoundException;
 
-int mapWidth = 100, mapHeight = 90;
-int xOffset, yOffset;
-int xSpawn = 5, ySpawn = 31;
-float playerSpeed = 2.0, gravity = .3, terminalVelocity = 6.0; 
-float jumpCooldownTime;
+int mapWidth = 100, mapHeight = 90, xOffset, yOffset, xSpawn = 5, ySpawn = 31;
+float playerSpeed = 2.0, gravity = .3, terminalVelocity = 6.0, jumpCooldownTime;
 int viewDist;
-boolean hasCollided = false, debugGUI = false, inSight;
-boolean saving = false;
+boolean hasCollided = false, debugGUI = false;
 
-boolean loadLevelFromFile = false, doneLoading = false;
+boolean loadLevelFromFile = true, doneLoading = false, saving = false;
 
 final String TITLE = "Minecraft 2D", VERSION = "alpha 0.1";
 final int SCALE = 3, TILE_SIZE = 16 * SCALE;
@@ -20,13 +16,16 @@ final int FPS = 60;
 
 PFont font;
 DecimalFormat df = new DecimalFormat("#.00");
+Tile[] map;
 boolean[] keys = new boolean[16];
-PImage spriteSheet, playerSheet;
+PImage spriteSheet, playerSheet, zombieSheet;
+PVector mouse;
 HashMap<String, PImage> sprites = new HashMap<String, PImage>();
 HashMap<String, PImage> playerSprites = new HashMap<String, PImage>();
-Tile[] map;
+HashMap<String, PImage> zombieSprites = new HashMap<String, PImage>();
 
 Player player;
+Zombie zombie = new Zombie(xSpawn + 1, ySpawn);
 Input input = new Input();
 Screen screen = new Screen();
 
@@ -45,12 +44,13 @@ void setup() {
   ySpawn *= TILE_SIZE;
   xOffset = xSpawn - (width/3);
   yOffset = ySpawn - (width/3);
-
+  
   loadImages();
   resetMap(mapWidth, mapHeight);
 }
 
 void draw() {
+  mouse = new PVector(mouseY, mouseX);
   if (!saving && doneLoading) {
     background(0xffff00ff);
     frame.setTitle(TITLE + " - " + VERSION + " | " + (int)frameRate + " fps");  
@@ -58,6 +58,9 @@ void draw() {
     renderMap();
     player.render();
     player.move();
+    zombie.render();
+    zombie.move();
+    
     input.mouseEvents();
     if (debugGUI) screen.renderDebugOverlay();
 
@@ -72,12 +75,13 @@ void draw() {
   }
 }
 
-
 public void loadImages() {
   spriteSheet = loadImage("spriteSheet.png");
   playerSheet = loadImage("player.png");
+  zombieSheet = loadImage("zombie.png");
   spriteSheet.loadPixels();
   playerSheet.loadPixels();
+  zombieSheet.loadPixels();
 
   sprites.put("air", scaledImg(getSprite(spriteSheet, 0, 0), SCALE));
   sprites.put("dirt", scaledImg(getSprite(spriteSheet, 1, 0), SCALE));
@@ -90,14 +94,20 @@ public void loadImages() {
   playerSprites.put("arm2", scaledImg(getSprite(playerSheet, 2, 0, 4, 12), SCALE)); 
   playerSprites.put("leg1", scaledImg(getSprite(playerSheet, 3, 0, 4, 12), SCALE)); 
   playerSprites.put("leg2", scaledImg(getSprite(playerSheet, 1, 0, 4, 12), SCALE));
+
+  zombieSprites.put("head", scaledImg(playerSheet.get(0, 12, 8, 8), SCALE)); 
+  zombieSprites.put("torso", scaledImg(getSprite(playerSheet, 4, 0, 4, 12), SCALE)); 
+  zombieSprites.put("arm1", scaledImg(getSprite(playerSheet, 0, 0, 4, 12), SCALE)); 
+  zombieSprites.put("arm2", scaledImg(getSprite(playerSheet, 2, 0, 4, 12), SCALE)); 
+  zombieSprites.put("leg1", scaledImg(getSprite(playerSheet, 3, 0, 4, 12), SCALE)); 
+  zombieSprites.put("leg2", scaledImg(getSprite(playerSheet, 1, 0, 4, 12), SCALE));
 }
+
 public void saveLevel(String name) {
   println("Saving map...");
   saving = true;
 
   PrintWriter file = createWriter(name + ".txt");
-
-  //  file.println(player.xMap + "\t" + player.yMap); 
 
   for (int i = 0; i < map.length; i++) {
     file.println(map[i].name);
@@ -132,6 +142,7 @@ public void loadLevel(String path) {
   finally {
     for (int i = 0; i < map.length; i++) {
       map[i] = new Tile(tiles.get(i), i);
+      //if(i == 0) println("Tile  : " + tiles.get(i).getClass().getName());
     }
   }
 }
@@ -159,7 +170,7 @@ public PImage scaledImg(PImage img, float scale) {
   image.updatePixels(); 
   return image;
 }
-
+/*
 public PImage flipped(PImage img) {
   PImage image = createImage(img.width, img.height, ARGB);
   image.loadPixels();
@@ -172,7 +183,7 @@ public PImage flipped(PImage img) {
   image.updatePixels();
   return image;
 }
-
+*/
 public int lineLength(Line2D line) {
   float x1 = (float)line.getX1();
   float x2 = (float)line.getX2();
